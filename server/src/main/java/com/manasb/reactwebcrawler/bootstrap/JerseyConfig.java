@@ -5,7 +5,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.websocket.server.ServerEndpoint;
 
-@ServerEndpoint("/com/manasb/reactwebcrawler/api")
+@ServerEndpoint("/api")
 public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
