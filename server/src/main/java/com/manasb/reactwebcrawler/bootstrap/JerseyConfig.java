@@ -3,9 +3,9 @@ package com.manasb.reactwebcrawler.bootstrap;
 import com.manasb.reactwebcrawler.api.PingPongResource;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.websocket.server.ServerEndpoint;
+import javax.ws.rs.ApplicationPath;
 
-@ServerEndpoint("/api")
+@ApplicationPath("/api")
 public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
