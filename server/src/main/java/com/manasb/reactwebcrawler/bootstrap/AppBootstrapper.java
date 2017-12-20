@@ -2,7 +2,6 @@ package com.manasb.reactwebcrawler.bootstrap;
 
 import com.manasb.reactwebcrawler.api.CrawlerResource;
 import com.manasb.reactwebcrawler.api.PingPongResource;
-import com.manasb.reactwebcrawler.crawler.Crawler;
 import com.manasb.reactwebcrawler.crawler.CrawlerFactory;
 import com.manasb.reactwebcrawler.crawler.Scraper;
 import com.manasb.reactwebcrawler.crawler.SiteMapJsonFormatter;

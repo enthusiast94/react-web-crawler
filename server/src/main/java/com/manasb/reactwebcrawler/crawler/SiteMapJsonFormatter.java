@@ -13,52 +13,19 @@ import java.util.Set;
 
 public class SiteMapJsonFormatter {
 
-    private final Set<String> alreadyIncludedLinks = new HashSet<>();
 
     public String format(SiteMap siteMap) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("name", siteMap.baseUrl.toString());
-        Node node = siteMap.getNode(siteMap.baseUrl);
-        alreadyIncludedLinks.add(siteMap.baseUrl.toString());
-        JsonArray children = new JsonArray(node.links.size());
-
-        node.links.forEach(link -> {
-            JsonObject object = new JsonObject();
-            object.addProperty("name", link.toString());
-            alreadyIncludedLinks.add(link.toString());
-            object.add("children", getChildrenRecursively(link, siteMap));
-            children.add(object);
+        JsonArray links = new JsonArray();
+        siteMap.nodesByUrl.values().forEach(node -> {
+            node.links.forEach(link -> {
+                JsonObject object = new JsonObject();
+                object.addProperty("source", node.url.toString());
+                object.addProperty("target", link.toString());
+                links.add(object);
+            });
         });
-
-        jsonObject.add("children", children);
-
-        return jsonObject.toString();
+        return links.toString();
     }
-
-    private JsonArray getChildrenRecursively(URL url, SiteMap siteMap) {
-        Node node = siteMap.getNode(url);
-        JsonArray children = new JsonArray();
-
-        if (node == null) {
-            return children;
-        }
-
-        node.links.forEach(link -> {
-            JsonObject object = new JsonObject();
-            object.addProperty("name", link.toString());
-            if (!alreadyIncludedLinks.contains(url.toString())) {
-                alreadyIncludedLinks.add(link.toString());
-                object.add("children", getChildrenRecursively(link, siteMap));
-            } else {
-                object.add("children", new JsonArray());
-            }
-            children.add(object);
-        });
-
-
-        return children;
-    }
-
 
     /**
      * For testing

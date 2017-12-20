@@ -1,5 +1,6 @@
 package com.manasb.reactwebcrawler.crawler;
 
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 
 public class CrawlerFactory {
@@ -12,7 +13,7 @@ public class CrawlerFactory {
         this.scraper = scraper;
     }
 
-    public Crawler newCrawler() {
-        return new Crawler(executorService, scraper);
+    public Crawler newCrawler(URL baseUrl, int depth) {
+        return new Crawler(executorService, scraper, baseUrl, depth);
     }
 }

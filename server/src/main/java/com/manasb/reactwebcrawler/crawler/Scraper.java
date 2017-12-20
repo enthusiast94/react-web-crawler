@@ -14,10 +14,7 @@ import java.util.Set;
 
 public class Scraper {
 
-    public List<URL> scrapeLinks(URL url) throws IOException {
-        String domain = url.getHost();
-        String base = url.getProtocol() + "://" + domain;
-
+    public List<URL> scrapeLinks(URL url, URL baseUrl) throws IOException {
         Document document = Jsoup.connect(url.toString()).get();
         Elements urlElements = document.select("a[href]");
 
@@ -26,7 +23,7 @@ public class Scraper {
             String urlString = urlElement.attr("href");
 
             if (urlString.startsWith("/")) {
-                urls.add(new URL(base + urlString));
+                urls.add(new URL(baseUrl.toString() + urlString));
             } else if (urlString.startsWith("http")) {
                 urls.add(new URL(urlString));
             }

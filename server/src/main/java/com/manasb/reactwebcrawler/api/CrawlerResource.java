@@ -44,9 +44,11 @@ public class CrawlerResource {
             return Response.status(Response.Status.BAD_REQUEST).entity("Provided URL is malformed").build();
         }
 
-        Crawler crawler = crawlerFactory.newCrawler();
+        Crawler crawler = crawlerFactory.newCrawler(netUrl, depth);
         try {
-            SiteMap siteMap = crawler.crawl(netUrl, depth).get();
+            log.info("Started crawling [{}]", url);
+            SiteMap siteMap = crawler.start().get();
+            log.info("Finished crawling [{}]", url);
             return Response.ok().entity(siteMapJsonFormatter.format(siteMap)).build();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage(), e);

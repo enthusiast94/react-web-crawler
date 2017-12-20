@@ -1,6 +1,7 @@
 package com.manasb.reactwebcrawler.crawler;
 
 import com.manasb.reactwebcrawler.crawler.domain.SiteMap;
+import com.manasb.reactwebcrawler.crawler.domain.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,63 +13,49 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
 
-import static java.util.stream.Collectors.toList;
-
 public class Crawler {
 
     private static final Logger log = LoggerFactory.getLogger(Crawler.class);
+
     private final ExecutorService executorService;
     private final Scraper scraper;
-    private final List<CompletableFuture> pendingFutures = new ArrayList<>();
-    private final CompletableFuture<SiteMap> overallProgressFuture = new CompletableFuture<>();
-    private SiteMap siteMap;
+    private final URL baseUrl;
+    private final String baseDomain;
+    private final int depth;
+    private final BlockingQueue<Task> pendingTasks = new LinkedBlockingQueue<>();
+    private final SiteMap siteMap;
 
-    Crawler(ExecutorService executorService, Scraper scraper) {
+    Crawler(ExecutorService executorService, Scraper scraper, URL baseUrl, int depth)
+            throws IllegalArgumentException {
         this.executorService = executorService;
         this.scraper = scraper;
-    }
-
-    public Future<SiteMap> crawl(URL baseUrl, int depth) {
-        if (depth < 1) {
-            return CompletableFuture.failedFuture(new Exception("depth must be > 0"));
-        }
+        this.baseUrl = baseUrl;
+        this.depth = depth;
 
         siteMap = new SiteMap(baseUrl);
-        String baseDomain = baseUrl.getHost();
-        List<URL> allLinks = scrapeLinks(baseUrl);
-        List<URL> internalLinks = allLinks.stream()
-                .filter(isInternal(baseDomain))
-                .collect(toList());
+        baseDomain = baseUrl.getHost();
 
-        siteMap.addNode(baseUrl, allLinks);
-
-        for (int i = 0; i < internalLinks.size(); i++) {
-            URL link = internalLinks.get(i);
-                crawlRecursively(link, baseDomain, depth-1, i == internalLinks.size() - 1);
+        if (depth < 1) {
+            throw new IllegalArgumentException("depth must be > 0");
         }
-
-        return overallProgressFuture;
     }
 
-    private void crawlRecursively(URL url, String baseDomain, int depth, boolean isLast) {
-        if (siteMap.hasLinkAlreadyBeenVisited(url) || depth == 0) {
-            if (isLast) {
-                waitForAllPendingFutures();
-            }
+    public Future<SiteMap> start() {
+        crawl(baseUrl, depth);
+        return CompletableFuture.completedFuture(siteMap);
+    }
 
+    private void crawl(URL url, int depth) {
+        if (siteMap.hasLinkAlreadyBeenVisited(url) || depth == 0) {
             return;
         }
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            List<URL> links = scrapeLinks(url);
-            siteMap.addNode(url, links);
+        List<URL> allLinks = scrapeLinks(url);
+        siteMap.addNode(url, allLinks);
 
-            links.stream()
-                    .filter(isInternal(baseDomain))
-                    .forEach(link -> crawlRecursively(link, baseDomain, depth-1, isLast));
-        }, executorService);
-
-        pendingFutures.add(future);
+        allLinks.stream()
+                .filter(isInternal(baseDomain))
+                .forEach(link -> crawl(link, depth - 1));
     }
 
     private Predicate<URL> isInternal(String baseDomain) {
@@ -78,23 +65,11 @@ public class Crawler {
     private List<URL> scrapeLinks(URL url) {
         try {
             log.info("Scraping {}", url.toString());
-            return scraper.scrapeLinks(url);
+            return scraper.scrapeLinks(url, baseUrl);
         } catch (IOException e) {
             log.error("There was a problem scraping URL [{}], so ignoring it: {}", url.toString(), e);
             return new ArrayList<>();
         }
-    }
-
-    private void waitForAllPendingFutures() {
-        CompletableFuture[] pendingFuturesArray = pendingFutures.toArray(new CompletableFuture[pendingFutures.size()]);
-        CompletableFuture.allOf(pendingFuturesArray).whenComplete((ignored, throwable) -> {
-            if (throwable != null) {
-                log.error("Error waiting for all pending futures: {}", throwable);
-                overallProgressFuture.completeExceptionally(throwable);
-            }
-
-            overallProgressFuture.complete(siteMap);
-        });
     }
 
     /**
@@ -103,8 +78,9 @@ public class Crawler {
     public static void main(String[] args) throws MalformedURLException {
         Crawler crawler = null;
         try {
-            crawler = new Crawler(Executors.newFixedThreadPool(10), new Scraper());
-            SiteMap siteMap = crawler.crawl(new URL("http://fashiontap.com/"), 1).get();
+            crawler = new Crawler(Executors.newFixedThreadPool(10), new Scraper(),
+                    new URL("http://localhost:8080/"), 1);
+            SiteMap siteMap = crawler.start().get();
             log.info("Done");
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage());
