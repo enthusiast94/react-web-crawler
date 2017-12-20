@@ -13,7 +13,6 @@ import java.util.Set;
 
 public class SiteMapJsonFormatter {
 
-
     public String format(SiteMap siteMap) {
         JsonArray links = new JsonArray();
         siteMap.nodesByUrl.values().forEach(node -> {
@@ -25,21 +24,5 @@ public class SiteMapJsonFormatter {
             });
         });
         return links.toString();
-    }
-
-    /**
-     * For testing
-     */
-    public static void main(String[] args) throws MalformedURLException {
-        SiteMapJsonFormatter formatter = new SiteMapJsonFormatter();
-        SiteMap siteMap = new SiteMap(new URL("http://www.google.com"));
-        siteMap.addNode(new URL("http://www.google.com"), Lists.newArrayList(
-                new URL("http://www.a.com"),
-                new URL("http://www.b.com")
-        ));
-        siteMap.addNode(new URL("http://www.a.com"), Lists.newArrayList(
-                new URL("http://www.google.com")
-        ));
-        System.out.println(formatter.format(siteMap));
     }
 }

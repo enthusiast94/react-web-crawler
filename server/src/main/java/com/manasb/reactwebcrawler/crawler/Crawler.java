@@ -5,12 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -92,24 +94,6 @@ public class Crawler {
         } catch (IOException e) {
             log.error("There was a problem scraping URL [{}], so ignoring it: {}", url.toString(), e);
             return new ArrayList<>();
-        }
-    }
-
-    /**
-     * For testing
-     */
-    public static void main(String[] args) throws MalformedURLException {
-        Crawler crawler = null;
-        try {
-            crawler = new Crawler(Executors.newFixedThreadPool(10), new Scraper(),
-                    new URL("http://localhost:8080/"), 1);
-            SiteMap siteMap = crawler.crawl();
-            log.info("Done");
-        } catch (ExecutionException | InterruptedException e) {
-            log.error(e.getMessage());
-        } finally {
-            assert crawler != null;
-            crawler.executorService.shutdownNow();
         }
     }
 }
