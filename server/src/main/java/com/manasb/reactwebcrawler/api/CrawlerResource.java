@@ -41,13 +41,18 @@ public class CrawlerResource {
             netUrl = new URL(url);
         } catch (MalformedURLException e) {
             log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("Provided URL is malformed").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(String.format("url [%s] is malformed", url)).build();
+        }
+
+        if (depth < 1 || depth > 3) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(String.format("depth must be > 0 and < 4 but " +
+                    "was %s", depth)).build();
         }
 
         Crawler crawler = crawlerFactory.newCrawler(netUrl, depth);
         try {
             log.info("Started crawling [{}]", url);
-            SiteMap siteMap = crawler.start().get();
+            SiteMap siteMap = crawler.crawl();
             log.info("Finished crawling [{}]", url);
             return Response.ok().entity(siteMapJsonFormatter.format(siteMap)).build();
         } catch (InterruptedException | ExecutionException e) {
