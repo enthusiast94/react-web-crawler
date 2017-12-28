@@ -5,6 +5,7 @@ import com.manasb.reactwebcrawler.api.PingPongResource;
 import com.manasb.reactwebcrawler.crawler.CrawlerFactory;
 import com.manasb.reactwebcrawler.crawler.Scraper;
 import com.manasb.reactwebcrawler.crawler.SiteMapJsonFormatter;
+import com.manasb.reactwebcrawler.util.HttpResponseFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,9 @@ public class AppBootstrapper {
 
     @Bean
     public CrawlerResource crawlerResource(ExecutorService executorService) {
-        return new CrawlerResource(new CrawlerFactory(executorService, new Scraper()), new SiteMapJsonFormatter());
+        return new CrawlerResource(
+                new CrawlerFactory(executorService, new Scraper()),
+                new SiteMapJsonFormatter(),
+                new HttpResponseFactory());
     }
 }

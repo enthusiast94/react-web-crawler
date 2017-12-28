@@ -4,6 +4,7 @@ import com.manasb.reactwebcrawler.crawler.Crawler;
 import com.manasb.reactwebcrawler.crawler.CrawlerFactory;
 import com.manasb.reactwebcrawler.crawler.SiteMapJsonFormatter;
 import com.manasb.reactwebcrawler.crawler.domain.SiteMap;
+import com.manasb.reactwebcrawler.util.HttpResponseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +23,14 @@ public class CrawlerResource {
 
     private final CrawlerFactory crawlerFactory;
     private final SiteMapJsonFormatter siteMapJsonFormatter;
+    private final HttpResponseFactory httpResponseFactory;
 
-    public CrawlerResource(CrawlerFactory crawlerFactory, SiteMapJsonFormatter siteMapJsonFormatter) {
+    public CrawlerResource(CrawlerFactory crawlerFactory,
+                           SiteMapJsonFormatter siteMapJsonFormatter,
+                           HttpResponseFactory httpResponseFactory) {
         this.crawlerFactory = crawlerFactory;
         this.siteMapJsonFormatter = siteMapJsonFormatter;
+        this.httpResponseFactory = httpResponseFactory;
     }
 
     @Path("/crawl")
@@ -33,7 +38,8 @@ public class CrawlerResource {
     public Response crawl(@QueryParam("url") String url, @QueryParam("depth") int depth) {
 
         if (url == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("url is a required parameter").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(httpResponseFactory.createErrorMessage("url is a " +
+                    "required parameter")).build();
         }
 
         URL netUrl;
@@ -41,12 +47,14 @@ public class CrawlerResource {
             netUrl = new URL(url);
         } catch (MalformedURLException e) {
             log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(String.format("url [%s] is malformed", url)).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(httpResponseFactory.createErrorMessage(String.format(
+                    "url [%s] is malformed", url))).build();
         }
 
         if (depth < 1 || depth > 3) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(String.format("depth must be > 0 and < 4 but " +
-                    "was %s", depth)).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(httpResponseFactory.createErrorMessage(String.format(
+                    "depth must be > 0 and < 4 but " +
+                    "was %s", depth))).build();
         }
 
         Crawler crawler = crawlerFactory.newCrawler(netUrl, depth);
@@ -54,7 +62,7 @@ public class CrawlerResource {
             log.info("Started crawling [{}]", url);
             SiteMap siteMap = crawler.crawl();
             log.info("Finished crawling [{}]", url);
-            return Response.ok().entity(siteMapJsonFormatter.format(siteMap)).build();
+            return Response.ok().entity(httpResponseFactory.createOkMessage(siteMapJsonFormatter.format(siteMap))).build();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage(), e);
             return Response.serverError().entity(e.getMessage()).build();
