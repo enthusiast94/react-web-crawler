@@ -62,7 +62,7 @@ public class CrawlerResource {
             log.info("Started crawling [{}]", url);
             SiteMap siteMap = crawler.crawl();
             log.info("Finished crawling [{}]", url);
-            return Response.ok().entity(httpResponseFactory.createOkMessage(siteMapJsonFormatter.format(siteMap))).build();
+            return Response.ok().entity(httpResponseFactory.createOkMessage(siteMapJsonFormatter.format(siteMap, depth))).build();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage(), e);
             return Response.serverError().entity(e.getMessage()).build();

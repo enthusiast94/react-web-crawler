@@ -25,10 +25,9 @@ export default class App extends React.Component {
                 <h1 style={{ textAlign: "center", marginTop: "15px" }}>Multithreaded Web Crawler!</h1>
                 <br />
                 <QueryForm onSubmit={this.onQuerySubmit} isLoading={state.isFetching} />
-
                 {state.isFetching && <p>Loading...</p>}
                 {state.error && <p className="text-danger"><strong>Error:</strong> {state.error}</p>}
-                {state.sitemap && <SiteMap links={state.sitemap} />}
+                {state.sitemap && <SiteMap sitemap={state.sitemap} />}
             </div>
         );
     }
