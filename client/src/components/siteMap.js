@@ -5,7 +5,7 @@ export default function SiteMap(props) {
 
     return (
         <div>
-            <ReactJson src={props.sitemap} theme="railscasts" />
+            <ReactJson src={props.sitemap} theme="harmonic" />
             <br/>
         </div>
     );

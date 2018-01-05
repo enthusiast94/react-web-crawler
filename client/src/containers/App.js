@@ -22,7 +22,7 @@ export default class App extends React.Component {
 
         return (
             <div className="container">
-                <h1 style={{ textAlign: "center", marginTop: "15px" }}>Multithreaded Web Crawler!</h1>
+                <h1 style={{ textAlign: "center", marginTop: "15px" }}>Multithreaded Web Crawler</h1>
                 <br />
                 <QueryForm onSubmit={this.onQuerySubmit} isLoading={state.isFetching} />
                 {state.isFetching && <p>Loading...</p>}
