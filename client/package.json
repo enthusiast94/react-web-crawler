@@ -5,7 +5,7 @@
   "dependencies": {
     "bootstrap": "^4.0.0-beta.2",
     "bootswatch": "^4.0.0-beta.2",
-    "d3": "3.5.17",
+    "movefiles": "^1.0.1",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && mvf build target/classes/static",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
