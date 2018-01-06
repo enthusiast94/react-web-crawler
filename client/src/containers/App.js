@@ -21,13 +21,19 @@ export default class App extends React.Component {
         console.log(state);
 
         return (
-            <div className="container">
-                <h1 style={{ textAlign: "center", marginTop: "15px" }}>Multithreaded Web Crawler</h1>
-                <br />
-                <QueryForm onSubmit={this.onQuerySubmit} isLoading={state.isFetching} />
-                {state.isFetching && <p>Loading...</p>}
-                {state.error && <p className="text-danger"><strong>Error:</strong> {state.error}</p>}
-                {state.sitemap && <SiteMap sitemap={state.sitemap} />}
+            <div>
+                <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+                    <div className="container">
+                        <a className="navbar-brand" href="#">Multithreaded Web Crawler</a>
+                    </div>
+                </nav>
+                <br/>
+                <div className="container">
+                    <QueryForm onSubmit={this.onQuerySubmit} isLoading={state.isFetching} />
+                    {state.isFetching && <p>Loading...</p>}
+                    {state.error && <p className="text-danger"><strong>Error:</strong> {state.error}</p>}
+                    {state.sitemap && <SiteMap sitemap={state.sitemap} />}
+                </div>
             </div>
         );
     }
